@@ -1,0 +1,39 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: spring_security
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      url: jdbc:mysql://39.107.226.218:3306/cloud_zyou?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT
+      username: root
+      password: cpsoft
+      # 初始连接数
+      initial-size: 5
+      # 最大连接池数量
+      max-active: 100
+      # 最小连接池数量
+      min-idle: 10
+      # 配置获取连接等待超时的时间
+      max-wait: 60000
+  redis:
+    password: 12345
+    database: 0
+  http:
+    encoding:
+      enabled: true
+      charset: utf-8
+eureka:
+  instance:
+    hostname: ${spring.cloud.client.ip-address}
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 5
+    prefer-ip-address: true
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8000/eureka/
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+
