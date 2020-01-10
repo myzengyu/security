@@ -12,10 +12,11 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8000/eureka/
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
 zuul:
-  strip-prefix: false
+  host:
+    connect-timeout-millis: 150000 #HTTP连接超时要比Hystrix的大
+    socket-timeout-millis: 60000   #socket超时
+  strip-prefix: true
   routes:
     spring_security:
       path: /uaa/**
@@ -23,5 +24,9 @@ zuul:
     spring_order:
       path: /order/**
       serviceId: spring_order
+ribbon:
+  ReadTimeout: 30000
+  ConnectTimeout: 30000
+
 
 
