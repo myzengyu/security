@@ -2,11 +2,13 @@ server:
   port: 8030
 spring:
   application:
-    name: order-service
+    name: spring_member
   http:
     encoding:
       enabled: true
       charset: utf-8
+  main:
+    allow-bean-definition-overriding: true
 eureka:
   instance:
     hostname: ${spring.cloud.client.ip-address}
@@ -16,3 +18,5 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8000/eureka/
+
+

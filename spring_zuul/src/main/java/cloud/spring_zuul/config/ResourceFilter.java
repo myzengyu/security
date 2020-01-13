@@ -16,7 +16,7 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @Configuration
 public class ResourceFilter {
 
-    private final String RESOURCE_ID = "CDSY";
+    private final String RESOURCE_ID = "res1";
     @Autowired
     private TokenStore tokenStore;
 
@@ -47,7 +47,7 @@ public class ResourceFilter {
 
         public void configure(HttpSecurity http) throws Exception {
             //把test访问的所有路径进行校验，看scope中是否含有role_api
-            http.authorizeRequests().antMatchers("/test/**").access("#oauth2.hasScope('ROLE_API')");
+            http.authorizeRequests().antMatchers("/member/**").access("#oauth2.hasScope('ROLE_API')");
         }
     }
 }

@@ -7,17 +7,18 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 /**
- * @author Administrator
- * @version 1.0
- **/
+ * 2 * @Author:
+ * 3 * @Date: 2020/1/9 10:47
+ * 4
+ */
 @Configuration
 public class TokenConfig {
-
-    private String SIGNING_KEY = "uaa123";
+    //密钥
+    private final String SIGNING_KEY = "cdsy";
 
     @Bean
     public TokenStore tokenStore() {
-        //JWT令牌存储方案
+        //设置token加密方式
         return new JwtTokenStore(accessTokenConverter());
     }
 

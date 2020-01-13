@@ -1,4 +1,4 @@
-package cloud.spring_order.config;
+package cloud.spring_member.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -15,13 +15,13 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
  **/
 @Configuration
 @EnableResourceServer
-public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
+public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
 
     public static final String RESOURCE_ID = "res1";
 
     @Autowired
-    TokenStore tokenStore;
+    private TokenStore tokenStore;
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
@@ -40,16 +40,5 @@ public class ResouceServerConfig extends ResourceServerConfigurerAdapter {
                 .and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
-
-    //资源服务令牌解析服务
- /*   @Bean
-    public ResourceServerTokenServices tokenService() {
-        //使用远程服务请求授权服务器校验token,必须指定校验token 的url、client_id，client_secret
-        RemoteTokenServices service=new RemoteTokenServices();
-        service.setCheckTokenEndpointUrl("http://localhost:53020/uaa/oauth/check_token");
-        service.setClientId("c1");
-        service.setClientSecret("secret");
-        return service;
-    }*/
 
 }

@@ -25,6 +25,8 @@ spring:
     encoding:
       enabled: true
       charset: utf-8
+  main:
+    allow-bean-definition-overriding: true
 eureka:
   instance:
     hostname: ${spring.cloud.client.ip-address}
@@ -34,6 +36,4 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8000/eureka/
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
 

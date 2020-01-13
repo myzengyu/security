@@ -1,10 +1,10 @@
-package cloud.spring_order.filter;
+package cloud.spring_member.filter;
 
+import cloud.spring_member.common.EncryptUtil;
+import cloud.spring_member.model.UserDTO;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import cloud.spring_order.common.EncryptUtil;
-import cloud.spring_order.model.UserDTO;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,9 +28,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
-            //解析出头中的token
-        String token = httpServletRequest.getHeader("json-token");
-        if(token!=null){
+        //解析出头中的token
+        String token = httpServletRequest.getHeader("token-json");
+        if (token != null) {
             String json = EncryptUtil.decodeUTF8StringBase64(token);
             //将token转成json对象
             JSONObject jsonObject = JSON.parseObject(json);
@@ -44,14 +44,12 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             String[] authorities = authoritiesArray.toArray(new String[authoritiesArray.size()]);
             //将用户信息和权限填充 到用户身份token对象中
             UsernamePasswordAuthenticationToken authenticationToken
-                    = new UsernamePasswordAuthenticationToken(userDTO,null, AuthorityUtils.createAuthorityList(authorities));
+                    = new UsernamePasswordAuthenticationToken(userDTO, null, AuthorityUtils.createAuthorityList(authorities));
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
             //将authenticationToken填充到安全上下文
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-
         }
-        filterChain.doFilter(httpServletRequest,httpServletResponse);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
 
     }
 }

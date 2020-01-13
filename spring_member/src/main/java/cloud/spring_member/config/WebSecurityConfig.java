@@ -1,4 +1,4 @@
-package cloud.spring_order.config;
+package cloud.spring_member.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -19,12 +19,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeRequests()
-//                .antMatchers("/r/r1").hasAuthority("p2")
-//                .antMatchers("/r/r2").hasAuthority("p2")
                 .antMatchers("/r/**").authenticated()//所有/r/**的请求必须认证通过
-                .anyRequest().permitAll()//除了/r/**，其它的请求可以访问
-        ;
-
-
+                .anyRequest().permitAll();//除了/r/**，其它的请求可以访问
     }
 }

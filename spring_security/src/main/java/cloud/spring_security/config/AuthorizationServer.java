@@ -25,31 +25,26 @@ import javax.sql.DataSource;
 import java.util.Arrays;
 
 /**
- * @author Administrator
- * @version 1.0
- * 授权服务配置
- **/
+ * 2 * @Author:
+ * 3 * @Date: 2020/1/9 14:03
+ * 4
+ */
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
-    private TokenStore tokenStore;
-
+    private TokenStore tokenStore;  //令牌存储方式
     @Autowired
-    private ClientDetailsService clientDetailsService;
-
+    private ClientDetailsService clientDetailsService; //用于检测客户端授权
     @Autowired
-    private AuthorizationCodeServices authorizationCodeServices;
-
+    private AuthorizationCodeServices authorizationCodeServices;  //授权码认证服务
     @Autowired
-    private AuthenticationManager authenticationManager;
-
+    private AuthenticationManager authenticationManager;   //认证管理
     @Autowired
-    private JwtAccessTokenConverter accessTokenConverter;
-
+    private JwtAccessTokenConverter jwtAccessTokenConverter;
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;  //使用的是BCryptPasswordEncoder加密
 
     //将客户端信息存储到数据库
     @Bean
@@ -59,58 +54,50 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
         return clientDetailsService;
     }
 
-    //客户端详情服务
-    @Override
-    public void configure(ClientDetailsServiceConfigurer clients)
-            throws Exception {
+    //客户端校验，看当前客户端是否已经被授权，并且查看该客户端的权限到底是哪些
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        //进行一个SQL的查询，根据传过来的client字段，进行校验，数据库字段和表明一定要喝SQL的一样
         clients.withClientDetails(clientDetailsService);
     }
 
-
-    //令牌管理服务
-    @Bean
-    public AuthorizationServerTokenServices tokenService() {
-        DefaultTokenServices service=new DefaultTokenServices();
-        service.setClientDetailsService(clientDetailsService);//客户端详情服务
-        service.setSupportRefreshToken(true);//支持刷新令牌
-        service.setTokenStore(tokenStore);//令牌存储策略
+    //令牌解析和刷新
+    private AuthorizationServerTokenServices tokenService() {
+        DefaultTokenServices tokenServices = new DefaultTokenServices();
+        tokenServices.setClientDetailsService(clientDetailsService); //客户端详情服务
+        tokenServices.setSupportRefreshToken(true); //支持刷新令牌 当原本的令牌失效后，可以刷新令牌
+        tokenServices.setTokenStore(tokenStore); //令牌存储方式
         //令牌增强
         TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConverter));
-        service.setTokenEnhancer(tokenEnhancerChain);
-
-        service.setAccessTokenValiditySeconds(7200); // 令牌默认有效期2小时
-        service.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
-        return service;
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(jwtAccessTokenConverter));
+        tokenServices.setTokenEnhancer(tokenEnhancerChain);
+        tokenServices.setAccessTokenValiditySeconds(7200); // 令牌默认有效期2小时
+        tokenServices.setRefreshTokenValiditySeconds(259200); // 刷新令牌默认有效期3天
+        return tokenServices;
     }
-
-    //设置授权码模式的授权码如何存取，暂时采用内存方式
-/*    @Bean
-    public AuthorizationCodeServices authorizationCodeServices() {
-        return new InMemoryAuthorizationCodeServices();
-    }*/
 
     @Bean
     public AuthorizationCodeServices authorizationCodeServices(DataSource dataSource) {
         return new JdbcAuthorizationCodeServices(dataSource);//设置授权码模式的授权码如何存取
     }
 
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
-        endpoints
-                .authenticationManager(authenticationManager)//认证管理器
+    //生成和校验token的接口是公开的，不需要进行权限验证
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        endpoints.authenticationManager(authenticationManager)  //认证管理器
                 .authorizationCodeServices(authorizationCodeServices)//授权码服务
-                .tokenServices(tokenService())//令牌管理服务
-                .allowedTokenEndpointRequestMethods(HttpMethod.POST);
+                .tokenServices(tokenService()) //令牌管理服务
+                .allowedTokenEndpointRequestMethods(HttpMethod.POST); //post请求
+
+    }
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        security.tokenKeyAccess("permitAll()")                    //oauth/token_key是公开
+                .checkTokenAccess("permitAll()")                  //oauth/check_token公开
+                .allowFormAuthenticationForClients();            //表单认证（申请令牌）
     }
 
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer security){
-        security
-                .tokenKeyAccess("permitAll()")                    //oauth/token_key是公开
-                .checkTokenAccess("permitAll()")                  //oauth/check_token公开
-                .allowFormAuthenticationForClients()				//表单认证（申请令牌）
-        ;
-    }
+
+
+
+
+
 
 }

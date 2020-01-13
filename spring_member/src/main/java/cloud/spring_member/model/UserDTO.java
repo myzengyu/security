@@ -1,4 +1,4 @@
-package cloud.spring_order.model;
+package cloud.spring_member.model;
 
 import lombok.Data;
 

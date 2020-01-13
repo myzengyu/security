@@ -1,4 +1,4 @@
-package cloud.spring_order.common;
+package cloud.spring_member.common;
 
 
 import org.slf4j.Logger;

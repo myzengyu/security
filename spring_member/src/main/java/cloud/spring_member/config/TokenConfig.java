@@ -1,4 +1,4 @@
-package cloud.spring_order.config;
+package cloud.spring_member.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,17 +7,18 @@ import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenCo
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 /**
- * @author Administrator
- * @version 1.0
- **/
+ * 2 * @Author:
+ * 3 * @Date: 2020/1/9 10:47
+ * 4
+ */
 @Configuration
 public class TokenConfig {
-
-    private String SIGNING_KEY = "uaa123";
+    //密钥
+    private final String SIGNING_KEY = "cdsy";
 
     @Bean
     public TokenStore tokenStore() {
-        //JWT令牌存储方案
+        //设置token加密方式
         return new JwtTokenStore(accessTokenConverter());
     }
 
@@ -27,10 +28,4 @@ public class TokenConfig {
         converter.setSigningKey(SIGNING_KEY); //对称秘钥，资源服务器使用该秘钥来验证
         return converter;
     }
-
-   /* @Bean
-    public TokenStore tokenStore() {
-        //使用内存存储令牌（普通令牌）
-        return new InMemoryTokenStore();
-    }*/
 }
