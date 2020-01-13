@@ -5,43 +5,40 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-@Configuration        //配置类注解
-@EnableWebSecurity    //开启WebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)  //开启方法级的注解
+/**
+ * @author Administrator
+ * @version 1.0
+ **/
+@Configuration
+@EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    //安全配置
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/login/**").permitAll()
-                .anyRequest().authenticated()
-                .and()
-                .csrf().disable()      //关闭  csrf  跨站请求
-                .formLogin()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);//不使用session
+    //认证管理器
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
-
-    // 把 PasswordEncoder 放到  Spring 容器中
-    // 必须要有密码加密组件，不然会报错
+    //密码编码器
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    //把 AuthenticationManager 配置到 Spring 容器中，配置Oauth2 的时候会用到
-    //认证管理器
+    //安全拦截机制（最重要）
     @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/r/r1").hasAnyAuthority("p1")
+                .antMatchers("/login*").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+        ;
+
     }
 }
