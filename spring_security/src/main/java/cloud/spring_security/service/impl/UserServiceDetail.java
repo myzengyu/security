@@ -1,6 +1,7 @@
 package cloud.spring_security.service.impl;
 
 import cloud.spring_security.dao.UserMapper;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,9 +25,10 @@ public class UserServiceDetail implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         cloud.spring_security.entity.User byUsername = userMapper.findByUsername(username);
+        String userJson = JSONObject.toJSONString(byUsername);
         List<String> listAuthorities = userMapper.getListAuthorities(byUsername.getId()).stream().filter(s -> s.trim().replace("[\\s*\t\n\r]","") != "").distinct().collect(Collectors.toList());
         String[] authorities = listAuthorities.toArray(new String[listAuthorities.size()]);
-        UserDetails user = User.withUsername(byUsername.getUsername()).password(byUsername.getPassword()).authorities(authorities).build();
+        UserDetails user = User.withUsername(userJson).password(byUsername.getPassword()).authorities(authorities).build();
         return user;
     }
 }

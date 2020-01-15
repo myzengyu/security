@@ -42,12 +42,15 @@ public class ResourceFilter {
     @EnableResourceServer
     public class TestServiceConfig extends ResourceServerConfigurerAdapter {
         public void configure(ResourceServerSecurityConfigurer resource) throws Exception {
-            resource.tokenStore(tokenStore).resourceId(RESOURCE_ID).stateless(true);
+            resource.tokenStore(tokenStore).resourceId(RESOURCE_ID)
+                    .stateless(true);
         }
 
         public void configure(HttpSecurity http) throws Exception {
             //把test访问的所有路径进行校验，看scope中是否含有role_api
-            http.authorizeRequests().antMatchers("/member/**").access("#oauth2.hasScope('ROLE_API')");
+            http
+                    .authorizeRequests()
+                    .antMatchers("/member/**").access("#oauth2.hasScope('ROLE_API')");
         }
     }
 }

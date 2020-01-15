@@ -1,6 +1,7 @@
 package cloud.spring_zuul.filter;
 
 import cloud.spring_zuul.common.EncryptUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
@@ -11,8 +12,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 2 * @Author:
@@ -63,7 +66,7 @@ public class AuthFilter extends ZuulFilter {
             jsonToken.put("authorities", authorities);
         }
         //把Auth中解密好的明文信息转成json加密后储存到zuul的请求头中去
-        currentContext.addZuulRequestHeader("token-json", EncryptUtil.encodeUTF8StringBase64(JSONObject.toJSONString(jsonToken)));
+        currentContext.addZuulRequestHeader("token-json", EncryptUtil.encodeUTF8StringBase64(JSON.toJSONString(jsonToken)));
         return null;
     }
 }

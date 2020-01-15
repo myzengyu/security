@@ -23,10 +23,9 @@ zuul:
       serviceId: spring_security
     spring_order:
       path: /member/**
-      serviceId: spring_member
+      serviceId: SPRING_MEMBER
 ribbon:
   ReadTimeout: 30000
   ConnectTimeout: 30000
-
 
 
