@@ -25,7 +25,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(ResourceServerSecurityConfigurer resources) {
-        resources.tokenStore(tokenStore)     //验证令牌的服务
+        resources.resourceId(RESOURCE_ID)   //资源 id
+                .tokenStore(tokenStore)     //验证令牌的服务
                 .stateless(true);
     }
 
