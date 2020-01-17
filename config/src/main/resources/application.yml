@@ -1,0 +1,31 @@
+server:
+  port: 8600
+# 服务名称
+spring:
+  application:
+    name: config
+  cloud:
+    config:
+      server:
+        git:
+          #config-server 读取git环境地址
+          uri: https://gitee.com/xiao1314/springCloud.git
+          search-paths:
+          - order
+#        native:
+#          search-locations:
+      #读取分支环境
+      label: master
+
+eureka:
+  instance:
+    prefer-ip-address: true #以IP地址注册到服务中心，相互注册使用IP地址
+    #eureka客服端在收到最后一次心跳等待时间 单位秒。超过就剔除 （测试用）
+    lease-expiration-duration-in-seconds: 2
+    # eureka客服端向服务端发送心跳时间间隔 单位秒 （测试用）
+    lease-renewal-interval-in-seconds: 1
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:9000/eureka,http://localhost:9001/eureka

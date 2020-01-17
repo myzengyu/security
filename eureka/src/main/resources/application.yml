@@ -1,0 +1,26 @@
+server:
+  port: 9001
+
+
+eureka:
+  instance:
+    hostname: 127.0.0.1
+    prefer-ip-address: true #以IP地址注册到服务中心，相互注册使用IP地址
+ #   instance-id: app-eureka19001 修改eureka服务id
+  client:
+  #集群 需要true
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:9000/eureka/
+  server:
+        #关闭自我保护机制
+        enableSelfPreservation: false
+        # 清理间隔（单位毫秒，默认是60*1000）
+      #  evictionIntervalTimerInMs: 2000
+spring:
+  application:
+    name: app-eureka1
+
+
+

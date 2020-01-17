@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.StudentMapper">
+    <resultMap type="cloud.entity.Student" id="studentResultMap">
+        <id column="bs_id" property="id"/>
+        <result column="bs_provinceId" property="provinceId"/>
+        <result column="bs_cityId" property="cityId"/>
+        <result column="bs_areaId" property="areaId"/>
+        <result column="bs_number" property="number"/>
+        <result column="bs_classId" property="classId"/>
+        <result column="bs_name" property="name"/>
+        <result column="bs_sex" property="sex"/>
+        <result column="bs_age" property="age"/>
+        <result column="bs_headURL" property="headURL"/>
+        <result column="bs_birthday" property="birthday"/>
+        <result column="bs_address" property="address"/>
+        <result column="bs_state" property="state"/>
+        <result column="bs_departureDate" property="departureDate"/>
+        <result column="bs_entryDate" property="entryDate"/>
+        <result column="bs_isDel" property="isDel"/>
+        <result column="bs_createDate" property="createDate"/>
+        <result column="bs_updateDate" property="updateDate"/>
+        <result column="bs_reserved1" property="reserved1"/>
+        <result column="bs_reserved2" property="reserved2"/>
+        <result column="bs_parentTels" property="parentTels"/>
+    </resultMap>
+
+
+    <insert id="insert" parameterType="cloud.entity.Student" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO base_student(bs_number,bs_classId,bs_name,bs_sex,bs_age,bs_headURL,bs_birthday,bs_address,
+        bs_state,bs_departureDate,bs_isDel,bs_createDate,bs_updateDate,bs_reserved1,bs_reserved2,bs_entryDate,bs_parentTels)
+        VALUES (#{number},#{classId},#{name},#{sex},#{age},#{headURL},#{birthday},
+        #{address},2,#{departureDate},0,NOW(),NOW(),#{reserved1},#{reserved2},now(),#{parentTels})
+    </insert>
+    <insert id="batchInsert" parameterType="cloud.entity.Student" useGeneratedKeys="true" keyProperty="ids">
+        INSERT INTO base_student(bs_number,bs_classId,bs_name,bs_sex,bs_age,bs_headURL,bs_birthday,bs_address,
+        bs_state,bs_departureDate,bs_isDel,bs_createDate,bs_updateDate,bs_reserved1,bs_reserved2,bs_entryDate,bs_parentTels)
+        VALUE
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.number},#{item.classId},#{item.name},#{item.sex},#{item.age},#{item.headURL},#{item.birthday},
+            #{item.address},2,#{item.departureDate},0,NOW(),NOW(),#{item.reserved1},#{item.reserved2},now(),#{parentTels})
+        </foreach>
+    </insert>
+    <select id="selectStudentNameByParentTel" resultMap="studentResultMap">
+        select * FROM base_student where bs_isDel=0 and bs_name=#{name} and bs_parentTels LIKE CONCAT('%',#{tel},'%')
+        limit 1
+    </select>
+    <select id="selectById" parameterType="Long" resultMap="studentResultMap">
+        select * FROM base_student where bs_isDel=0 and bs_id =#{id}
+    </select>
+    <select id="selectClassIdByStudent" parameterType="Long" resultMap="studentResultMap">
+        select * FROM base_student where bs_isDel=0 and bs_classId =#{classId} and bs_state=2
+    </select>
+    <update id="updateStudentClass">
+        UPDATE base_student SET bs_classId=#{classId},bs_updateDate=now() where bs_id IN
+        <foreach collection="studentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <update id="updateStudentState">
+        UPDATE base_student
+        <set>
+            bs_state=#{state},bs_updateDate=now()
+            <if test="state !=null and state==2">
+                bs_entryDate=now(),
+            </if>
+            <if test="state !=null and state==4">
+                bs_departureDate=now(),
+            </if>
+        </set>
+        where bs_id IN
+        <foreach collection="studentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <delete id="delByIds">
+        UPDATE base_student SET bs_isDel=1, bs_updateDate = NOW() WHERE bs_id =#{id} and bs_isDel=0
+        <!-- <foreach collection="array" item="id" open="(" separator="," close=")">
+             #{id}
+         </foreach>-->
+    </delete>
+
+    <update id="update" parameterType="cloud.entity.Student">
+        UPDATE base_student
+        <set>
+            bs_updateDate=NOW(),
+
+            <if test="number !=null and number!=''">
+                bs_number=#{number},
+            </if>
+            <if test="name !=null and name!=''">
+                bs_name=#{name},
+            </if>
+            <if test="entryDate !=null and entryDate!=''">
+                bs_entryDate=#{entryDate},
+            </if>
+            <if test="age !=null and age!=''">
+                bs_age=#{age},
+            </if>
+            <if test="sex !=null and sex!=''">
+                bs_sex=#{sex},
+            </if>
+            <if test="headURL !=null">
+                bs_headURL=#{headURL},
+            </if>
+            <if test="cardNum != null">
+                bs_cardNum = #{cardNum},
+            </if>
+            <if test="state != null">
+                bs_state = #{state},
+            </if>
+            <if test="birthday !=null and birthday!=''">
+                bs_birthday=#{birthday},
+            </if>
+            <if test="address !=null">
+                bs_address=#{address},
+            </if>
+            <if test="reserved2 !=null">
+                bs_reserved2=#{reserved2},
+            </if>
+        </set>
+        WHERE bs_id=#{id} and bs_isDel=0
+    </update>
+
+    <select id="selectByProperty" parameterType="cloud.entity.Student" resultMap="studentResultMap">
+        SELECT *
+        FROM base_student stu
+        <where>
+            stu.bs_isDel=0
+            <if test="id !=null and id!=''">
+                AND stu.bs_id = #{id}
+            </if>
+            <if test="number !=null and number!=''">
+                AND stu.bs_number = #{number}
+            </if>
+            <if test="name !=null and name!=''">
+                AND stu.bs_name like ${name}"%"
+            </if>
+            <if test="sex !=null and sex!=''">
+                AND stu.bs_sex = #{sex}
+            </if>
+            <if test="state !=null and state!=''">
+                AND stu.bs_state = #{state}
+            </if>
+            <if test="pageNo !=null and pageNo!='' and  pageSize !=null and pageSize!=''">
+                limit (#{pageNo},#{pageSize})
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByParentId" parameterType="long" resultMap="studentResultMap">
+        select bs.* from base_student bs right join ref_parent_student rps on rps_studentId = bs_id where
+        rps.rps_parentrId = #{parentId}
+    </select>
+
+    <update id="updateParentTels">
+        update base_student set bs_parentTels = #{parentTels} where bs_id = #{studentId};
+    </update>
+</mapper>

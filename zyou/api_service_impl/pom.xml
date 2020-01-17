@@ -2,11 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>zyou</artifactId>
+        <groupId>com.cloud.zyou</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.cloud</groupId>
-    <artifactId>cloudDome</artifactId>
+    <artifactId>api_service_impl</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>api_garden_impl</module>
+        <module>api_system_impl</module>
+    </modules>
+
 
 </project>

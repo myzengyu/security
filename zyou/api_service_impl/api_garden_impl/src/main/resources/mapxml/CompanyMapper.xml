@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.CompanyMapper">
+    <resultMap type="cloud.entity.Company" id="companyResultMap">
+        <id column="bc_id" property="id"/>
+        <result column="bc_provinceId" property="provinceId"/>
+        <result column="bc_cityId" property="cityId"/>
+        <result column="bc_areaId" property="areaId"/>
+        <result column="bc_number" property="number"/>
+        <result column="bc_name" property="name"/>
+        <result column="bc_manager" property="manager"/>
+        <result column="bc_tel" property="tel"/>
+        <result column="bc_address" property="address"/>
+        <result column="bc_type" property="type"/>
+        <result column="bc_isDel" property="isDel"/>
+        <result column="bc_createDate" property="createDate"/>
+        <result column="bc_updateDate" property="updateDate"/>
+        <result column="bc_reserved1" property="reserved1"/>
+        <result column="bc_reserved2" property="reserved2"/>
+        <result column="bc_faculty" property="faculty"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="cloud.entity.Company" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        base_company(bc_provinceId,bc_cityId,bc_areaId,bc_number,bc_name,bc_manager,bc_tel,bc_type,bc_address,bc_isDel,bc_createDate,bc_updateDate,bc_reserved1,bc_reserved2,bc_faculty)
+        VALUES
+        (#{provinceId},#{cityId},#{areaId},#{number},#{name},#{manager},#{tel},#{type},#{address},0,now(),now(),#{reserved1},#{reserved2},#{faculty})
+    </insert>
+
+    <delete id="deleteById">
+        UPDATE base_company SET bc_isDel = 1,bc_updateDate=now() WHERE bc_id = #{id}
+    </delete>
+
+    <update id="update" parameterType="cloud.entity.Company">
+        UPDATE base_company
+        <set>
+            <if test="id !=null and id!=''">
+                bc_id=#{id},
+            </if>
+            <if test="provinceId !=null and provinceId!=''">
+                bc_provinceId=#{provinceId},
+            </if>
+            <if test="cityId !=null and cityId!=''">
+                bc_cityId=#{cityId},
+            </if>
+            <if test="areaId !=null and areaId!=''">
+                bc_areaId=#{areaId},
+            </if>
+            <if test="number !=null and number!=''">
+                bc_number=#{number},
+            </if>
+            <if test="name !=null and name!=''">
+                bc_name=#{name},
+            </if>
+            <if test="manager !=null and manager!=''">
+                bc_manager=#{manager},
+            </if>
+            <if test="tel !=null and tel!=''">
+                bc_tel=#{tel},
+            </if>
+            <if test="type !=null and type!=''">
+                bc_type=#{type},
+            </if>
+            <if test="address !=null and address!=''">
+                bc_address=#{address},
+            </if>
+            <if test="faculty !=null and faculty!=''">
+                bc_faculty=#{faculty},
+            </if>
+            bc_updateDate=now()
+        </set>
+        WHERE bc_id=#{id} and bc_isDel=0
+    </update>
+    <select id="selectById" parameterType="long" resultMap="companyResultMap">
+        SELECT * FROM base_company WHERE bc_id=#{id} and bc_isDel=0
+    </select>
+    <select id="selectByProperty" parameterType="cloud.entity.Company" resultMap="companyResultMap">
+        SELECT * FROM base_company
+        <where>
+            bc_isDel = 0
+            <if test="id !=null and id!=''">
+                AND bc_id = #{id}
+            </if>
+            <if test="provinceId !=null and provinceId!=''">
+                AND bc_provinceId = #{provinceId}
+            </if>
+            <if test="cityId !=null and cityId!=''">
+                AND bc_cityId = #{cityId}
+            </if>
+            <if test="areaId !=null and areaId!=''">
+                AND bc_areaId = #{areaId}
+            </if>
+            <if test="number !=null and number!=''">
+                AND bc_number = #{number}
+            </if>
+            <if test="name !=null and name!=''">
+                AND bc_name = #{name}
+            </if>
+            <if test="manager !=null and manager!=''">
+                AND bc_manager = #{manager}
+            </if>
+            <if test="tel !=null and tel!=''">
+                AND bc_tel = #{tel}
+            </if>
+            <if test="type !=null and type!=''">
+                AND bc_type = #{type}
+            </if>
+            <if test="address !=null and address!=''">
+                AND bc_address = #{address}
+            </if>
+            <if test="createDate !=null and createDate!=''">
+                AND bc_createDate = #{createDate}
+            </if>
+            <if test="updateDate !=null and updateDate!=''">
+                AND bc_updateDate = #{updateDate}
+            </if>
+            <if test="reserved1 !=null and reserved1!=''">
+                AND bc_reserved1 = #{reserved1}
+            </if>
+            <if test="reserved2 !=null and reserved2!=''">
+                AND bc_reserved2 = #{reserved2}
+            </if>
+            <if test="pageNo !=null and pageNo!='' and  pageSize !=null and pageSize!=''">
+                limit (#{pageNo},#{pageSize})
+            </if>
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.ClassesMapper">
+    <resultMap type="cloud.entity.Classes" id="classesResultMap">
+        <id column="bc_id" property="id"/>
+        <result column="bc_name" property="name"/>
+        <result column="bc_companyId" property="companyId"/>
+        <result column="bc_type" property="type"/>
+        <result column="bc_isDel" property="isDel"/>
+        <result column="bc_grade" property="grade"/>
+        <result column="bc_graduated" property="graduated"/>
+        <result column="bc_createDate" property="createDate"/>
+        <result column="bc_updateDate" property="updateDate"/>
+        <result column="bc_reserved1" property="reserved1"/>
+        <result column="bc_reserved2" property="reserved2"/>
+        <!--    <result column="provinceName" property="provinceName"/>
+            <result column="cityName" property="cityName"/>
+            <result column="areaName" property="areaName"/>-->
+    </resultMap>
+
+    <sql id="ClassesMap">
+        a.bc_id AS id,
+        a.bc_name AS name,
+        a.bc_companyId AS companyId,
+        a.bc_type AS type,
+        a.bc_isDel AS isDel,
+        a.bc_grade AS grade,
+        a.bc_createDate AS createDate,
+        a.bc_updateDate AS updateDate,
+        a.bc_reserved1 AS reserved1,
+        a.bc_reserved2 AS reserved2,
+        a.bc_graduated as graduated,
+        b.bc_name AS companyName
+    </sql>
+
+    <sql id="ClassesMaps">
+        LEFT JOIN base_company b on b.bc_id=a.bc_companyId and b.bc_isDel= 0
+    </sql>
+    <insert id="insert" parameterType="cloud.entity.Classes" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        base_class(bc_name,bc_companyId,bc_type,bc_isDel,bc_grade,bc_graduated,bc_createDate,bc_updateDate,bc_reserved1,bc_reserved2)
+        VALUES (#{name},#{companyId},#{type},0,#{grade},0,now(),now(),#{reserved1},#{reserved2})
+    </insert>
+
+    <insert id="batchInsert" parameterType="cloud.entity.Classes" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        base_class(bc_name,bc_companyId,bc_type,bc_isDel,bc_grade,bc_graduated,bc_createDate,bc_updateDate,bc_reserved1,bc_reserved2)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name},#{item.companyId},1,0,#{item.grade},0,now(),now(),#{item.reserved1},#{item.reserved2})
+        </foreach>
+    </insert>
+
+    <select id="selectByCompanyIdAndClassName" resultMap="classesResultMap">
+        select * from base_class where bc_companyId = #{companyId} and bc_isDel = 0 and bc_name = #{className}
+        and bc_graduated = 0
+    </select>
+    <select id="selectCompanyIdByClass" resultMap="classesResultMap">
+        select * from base_class where bc_companyId = #{companyId} and bc_isDel = 0 and bc_graduated = 0
+    </select>
+    <delete id="deleteById">
+        UPDATE base_class SET bc_isDel=1,bc_updateDate=now() WHERE bc_id = #{id}
+        <!--   <foreach collection="array" item="id" open="(" separator="," close=")">
+               #{id}
+           </foreach>-->
+    </delete>
+
+    <update id="update" parameterType="cloud.entity.Classes">
+        UPDATE base_class
+        <set>
+            <if test="id !=null and id!=''">
+                bc_id=#{id},
+            </if>
+            <if test="companyId !=null ">
+                bc_companyId=#{companyId},
+            </if>
+            <if test="name !=null and name!=''">
+                bc_name=#{name},
+            </if>
+            <if test="type !=null and type!=''">
+                bc_type=#{type},
+            </if>
+            <if test="grade !=null">
+                bc_grade=#{grade},
+            </if>
+            <if test="graduated != null">
+                bc_graduated = #{graduated},
+            </if>
+            bc_updateDate=now()
+        </set>
+        WHERE bc_id=#{id} and bc_isDel= 0
+    </update>
+
+    <select id="selectComByClass" parameterType="long" resultMap="classesResultMap">
+        SELECT *
+        FROM base_class a
+        <include refid="ClassesMaps"/>
+        WHERE a.bc_companyId=#{cid} and a.bc_isDel=0 and a.bc_graduated = 0
+    </select>
+    <select id="selectById" parameterType="long" resultMap="classesResultMap">
+        SELECT *
+        FROM base_class a
+        <include refid="ClassesMaps"/>
+        WHERE a.bc_id=#{id} and a.bc_isDel=0
+    </select>
+    <select id="selectId" parameterType="long" resultMap="classesResultMap">
+        SELECT * FROM base_class a WHERE a.bc_id=#{id} and a.bc_isDel=0 LOCK IN SHARE MODE
+    </select>
+    <select id="selectByProperty" parameterType="cloud.entity.Classes" resultMap="classesResultMap">
+        SELECT * FROM base_class a
+        <include refid="ClassesMaps"/>
+        <where>
+            a.bc_isDel = 0
+            <if test="companyName !=null and companyName!=''">
+                AND b.bc_name like CONCAT('%',#{companyName},'%')
+            </if>
+            <if test="id !=null and id!=''">
+                AND a.bc_id = #{id}
+            </if>
+            <if test="companyId !=null ">
+                AND a.bc_companyId=#{companyId}
+            </if>
+            <if test="name !=null and name!=''">
+                AND a.bc_name = #{name}
+            </if>
+            <if test="type !=null and type!=''">
+                AND a.bc_type = #{type}
+            </if>
+            <if test="grade !=null and grade!=''">
+                AND a.bc_grade=#{grade}
+            </if>
+            <if test="page.pageNo !=null  and  page.pageSize !=null and page.pageSize!=''">
+                limit #{page.pageNo},#{page.pageSize}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateGraduated">
+        update base_class set bc_graduated = 1,bc_updateDate=now() where bc_id = #{id} and bc_isDel = 0
+    </update>
+
+</mapper>

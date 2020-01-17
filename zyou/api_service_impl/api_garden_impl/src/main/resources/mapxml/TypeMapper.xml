@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.TypeMapper">
+
+    <resultMap id="typeMapper" type="cloud.entity.Type">
+        <id property="id" column="bc_id"/>
+        <result property="type" column="bc_type"/>
+        <result property="typeName" column="bc_typeName"/>
+        <result property="typeEn" column="bc_typeEn"/>
+        <result property="isDel" column="bc_isDel"/>
+        <result property="createDate" column="bc_createDate"/>
+        <result property="updateDate" column="bc_updateDate"/>
+        <result property="reserved1" column="bc_reserved1"/>
+        <result property="reserved2" column="bc_reserved2"/>
+    </resultMap>
+
+    <select id="selectAllTeacher" resultMap="typeMapper">
+        select * from base_custtype where bc_type in (1,2)
+    </select>
+
+    <select id="selectAllParent" resultMap="typeMapper">
+        select * from base_custtype where bc_type = 3
+    </select>
+    <select id="selectTypeName" resultType="Long">
+        SELECT bc_id FROM base_custtype where bc_typeName = #{typeName} and bc_isDel = 0 limit 1
+    </select>
+</mapper>

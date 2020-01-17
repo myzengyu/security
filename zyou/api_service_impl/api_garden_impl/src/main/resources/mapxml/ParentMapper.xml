@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.ParentMapper">
+    <resultMap type="cloud.entity.Parent" id="parentResultMap">
+        <id column="bp_id" property="id"/>
+        <result column="bp_number" property="number"/>
+        <result column="bp_name" property="name"/>
+        <result column="bp_sex" property="sex"/>
+        <result column="bp_tel" property="tel"/>
+        <result column="bp_workUnit" property="workUnit"/>
+        <result column="bp_address" property="address"/>
+        <result column="bp_headURL" property="headURL"/>
+        <result column="bp_birthday" property="birthday"/>
+        <result column="bp_isDel" property="isDel"/>
+        <result column="bp_actTime" property="actTime"/>
+        <result column="bp_createDate" property="createDate"/>
+        <result column="bp_updateDate" property="updateDate"/>
+        <result column="bp_reserved1" property="reserved1"/>
+        <result column="bp_reserved2" property="reserved2"/>
+        <association property="page.totalCount" javaType="cloud.common.page.MyPage" column="bp_id"
+                     select="getTotalCount">
+            <result column="totalCount" property="totalCount"/>
+        </association>
+        <association property="type" javaType="cloud.entity.Type">
+            <result column="typeName" property="typeName"/>
+        </association>
+        <collection property="student" ofType="cloud.entity.Student" column="bp_id">
+            <result column="studentName" property="name"/>
+            <association property="classes" javaType="cloud.entity.Classes">
+                <result column="className" property="name"/>
+                <association property="company" javaType="cloud.entity.Company">
+                    <result column="companyName" property="name"/>
+                </association>
+            </association>
+        </collection>
+
+    </resultMap>
+
+    <select id="getTotalCount" resultType="int">
+        select count(base_parent.bp_id) totalCount from base_parent
+    </select>
+
+    <select id="selectArea">
+        SELECT
+        sa.sa_name provinceName,sb.sa_name cityName,sc.sa_name areaName
+        FROM
+        base_company bc
+        LEFT JOIN sys_area sa ON bc.bc_provinceId = sa.sa_id
+        LEFT JOIN sys_area sb ON bc.bc_cityId = sb.sa_id
+        LEFT JOIN sys_area sc ON bc.bc_areaId = sc.sa_id
+        where bc.bc_id = #{bc_companyId};
+    </select>
+
+    <select id="searchById" resultMap="parentResultMap">
+        select bp_name from base_parent where bp_id = #{id}
+    </select>
+
+    <select id="selectByPhone" parameterType="String" resultMap="parentResultMap">
+        select * from base_parent where bp_isDel = 0 and bp_tel =#{tel}
+    </select>
+
+    <insert id="addParent" parameterType="cloud.entity.Parent" useGeneratedKeys="true" keyProperty="id">
+        insert into base_parent (bp_number, bp_name, bp_sex, bp_tel, bp_workUnit, bp_address, bp_headURL, bp_birthday,
+        bp_actTime, bp_createDate, bp_updateDate, bp_reserved1, bp_reserved2)
+        values
+        (#{number},#{name},#{sex},#{tel},#{workUnit},#{address},#{headURL},#{birthday},#{actTime},now(),now(),#{reserved1},#{reserved2});
+    </insert>
+
+    <update id="update" parameterType="cloud.entity.Parent">
+        update base_parent set bp_number = #{number},bp_name = #{name},bp_sex = #{sex},bp_tel = #{tel},bp_workUnit =
+        #{workUnit},bp_address = #{address},bp_headURL = #{headURL},bp_birthday = #{birthday},bp_updateDate = now()
+        where bp_id = #{id}
+    </update>
+
+    <insert id="addParentAndStudent">
+        insert into ref_parent_student (rps_parentrId, rps_studentId, rps_parentType)
+        values (#{parentId},#{studentId},#{typeId});
+    </insert>
+
+    <update id="updateParent">
+        update base_parent set bp_isDel = #{isDel} where bp_id = #{parentId};
+    </update>
+
+    <delete id="UnbindWithStudent">
+        delete from ref_parent_student where rps_parentrId = #{parentId}
+    </delete>
+
+    <select id="getParentPage" parameterType="cloud.entity.Parent" resultMap="parentResultMap">
+        SELECT
+        bp.*,bc.bc_typeName typeName,bs.bs_name studentName,cb.bc_name className,bcc.bc_name companyName
+        FROM
+        base_parent bp
+        LEFT JOIN ref_parent_student rps ON bp.bp_id = rps.rps_parentrId
+        left join base_student bs on bs.bs_id = rps_studentId
+        left join base_class cb on cb.bc_id = bs.bs_classId
+        left join base_company bcc on bcc.bc_id = cb.bc_companyId
+        left join base_custtype bc on bc.bc_id = rps_parentType
+        <where>
+            <if test="name != null and name != '' ">
+                and bp.bp_name like "%"#{name}"%"
+            </if>
+            <if test="tel != null and tel != '' ">
+                and bp.bp_tel like "%"#{tel}"%"
+            </if>
+            <if test="page != null">
+                <if test="page.startIndex != null">
+                    limit #{page.startIndex}
+                </if>
+                <if test="page.pageSize != null and page.pageSize != ''">
+                    ,#{page.pageSize}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" parameterType="Long" resultType="String">
+        select bp_tel from base_parent where bp_id =#{parentId}
+    </select>
+</mapper>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.RelationshipMapper">
+
+    <resultMap type="cloud.entity.Relationship" id="relationshipResultMap">
+        <result column="rps_parentrId" property="parentId"/>
+        <result column="rps_studentId" property="studentId"/>
+        <result column="rps_parentType" property="parentType"/>
+    </resultMap>
+
+
+    <delete id="deleteRelationship">
+        DELETE FROM ref_parent_student where rps_parentrId=#{parentId} and rps_studentId=#{studentId}
+    </delete>
+
+    <insert id="insert" parameterType="cloud.entity.Relationship">
+        INSERT INTO ref_parent_student(rps_parentrId,rps_studentId,rps_parentType) VALUES
+        (#{parentId},#{studentId},#{parentType})
+    </insert>
+</mapper>

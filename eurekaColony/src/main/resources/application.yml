@@ -1,0 +1,23 @@
+server:
+  port: 9000
+
+#集群 多台服务名称 必须相同
+spring:
+  application:
+    name: app-eureka1
+
+eureka:
+  server:
+        #关闭自我保护机制
+        enableSelfPreservation: false
+        # 清理间隔（单位毫秒，默认是60*1000）
+     #   evictionIntervalTimerInMs: 2000
+  instance:
+    hostname: 127.0.0.1
+    prefer-ip-address: true #以IP地址注册到服务中心，相互注册使用IP地址
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:9001/eureka/
+

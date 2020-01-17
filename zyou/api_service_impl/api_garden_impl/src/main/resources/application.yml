@@ -1,0 +1,86 @@
+server:
+  port: 8100
+# 服务名称
+spring:
+  jackson:
+    serialization:
+      fail_on_empty_beans: false #忽略无法转换的对象
+      #配置当属性值为空时，不进行json转换
+    deserialization:
+      #允许对象忽略json中不存在的属性
+      fail_on_unknown_properties: false
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    #druid相关配置
+    druid:
+      #基本属性
+      url: jdbc:mysql://39.107.226.218:3306/cloud_zyou?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT
+      username: root
+      password: cpsoft
+      # 初始连接数
+      initial-size: 5
+      # 最大连接池数量
+      max-active: 100
+      # 最小连接池数量
+      min-idle: 10
+      # 配置获取连接等待超时的时间
+      max-wait: 60000
+  application:
+    name: api_garden_impl
+eureka:
+  instance:
+    prefer-ip-address: true #以IP地址注册到服务中心，相互注册使用IP地址
+    #eureka客服端在收到最后一次心跳等待时间 单位秒。超过就剔除 （测试用）
+    lease-expiration-duration-in-seconds: 2
+    # eureka客服端向服务端发送心跳时间间隔 单位秒 （测试用）
+    lease-renewal-interval-in-seconds: 1
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://localhost:9000/eureka/,http://localhost:9001/eureka/
+#springCloud feign默认开启支持ribbon
+ribbon:
+  #建立连接所用的时间，
+  ReadTimeout: 10000
+  #建立连接后服务器读取到可用资源的时间
+  ConnectTimeout: 10000
+#开启hystrix 断路器
+feign:
+  hystrix:
+    enabled: true
+
+#设置Hystrix 默认超时时间
+#getOrderToSystemHystrix自定义方法名称 设置当前方法超时时间，需要在方法加上commandKey
+# default 系统默认方法
+hystrix:
+  command:
+    #    getOrderToSystemHystrix:
+    #      execution:
+    #        isolation:
+    #          thread:
+    #            timeoutInMilliseconds: 2000
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 8000
+swagger:
+  base-package: cloud.controller
+
+
+#公共配置与profiles选择无关
+mybatis:
+  mapperLocations: classpath*:mapxml/*Mapper.xml  #注意：一定要对应mapper映射xml文件的所在路径
+  typeAliasesPackage: com.cloud.entity  # 注意：对应实体类的路径
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+  #日志配置
+logging:
+  level:
+    #分包配置级别，即不同的目录下可以使用不同的级别
+    com.example.demo: debug

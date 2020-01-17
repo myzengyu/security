@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cloud.dao.TeacherMapper">
+    <resultMap type="cloud.entity.Teacher" id="teacherResultMap">
+        <id column="bt_id" property="id"/>
+        <result column="bt_number" property="number"/>
+        <result column="bt_name" property="name"/>
+        <result column="bp_isManage" property="isManage"/>
+        <result column="bt_sex" property="sex"/>
+        <result column="bt_tel" property="tel"/>
+        <result column="bt_address" property="address"/>
+        <result column="bt_headURL" property="headURL"/>
+        <result column="bt_birthday" property="birthday"/>
+        <result column="bt_quitTime" property="quitTime"/>
+        <result column="bt_entryTime" property="entryTime"/>
+        <result column="bt_isDel" property="isDel"/>
+        <result column="bt_createDate" property="createDate"/>
+        <result column="bt_updateDate" property="updateDate"/>
+        <result column="bt_reserved1" property="reserved1"/>
+        <result column="bt_reserved2" property="reserved2"/>
+        <association property="company" column="bc_id" javaType="cloud.entity.Company">
+            <id column="companyId" property="id"></id>
+            <result column="companyName" property="name"/>
+            <result column="provinceName" property="provinceName"/>
+            <result column="cityName" property="cityName"/>
+            <result column="areaName" property="areaName"/>
+        </association>
+        <association property="page" javaType="cloud.common.page.MyPage" column="name">
+            <result column="totalCount" property="totalCount"/>
+        </association>
+        <collection property="types" ofType="cloud.entity.Type" column="bt_id" select="getTypesByTeachId">
+        </collection>
+    </resultMap>
+    <resultMap type="cloud.entity.Type" id="typeMapping">
+        <result column="typeName" property="typeName"/>
+    </resultMap>
+
+    <select id="getTotalCount" resultType="int">
+        select count(base_teacher.bt_id) totalCount from base_teacher
+    </select>
+
+    <select id="getTypesByTeachId" resultMap="typeMapping">
+        SELECT
+        bc_typeName typeName
+        FROM
+        ref_teacher_class
+        LEFT JOIN base_custtype ON bc_id = rtc_custTypeId
+        WHERE rtc_teacherId = #{bt_id}
+    </select>
+
+    <select id="findTeacherByTel" parameterType="String" resultMap="teacherResultMap">
+        select
+        bt.*,bc.bc_id companyId
+        from
+        base_teacher bt
+        LEFT JOIN ref_teacher_class rtc ON bt.bt_id = rtc.rtc_teacherId
+        LEFT JOIN base_company bc ON rtc.rtc_companyId = bc.bc_id
+        where
+        bt_isDel = 0 and bt_tel = #{tel}
+    </select>
+
+    <insert id="addTeacher" parameterType="cloud.entity.Teacher" useGeneratedKeys="true" keyProperty="id">
+        insert into base_teacher (bt_number, bt_name, bt_isManage, bt_sex, bt_tel, bt_address, bt_headURL, bt_birthday,
+        bt_quitTime, bt_entryTime, bt_createDate, bt_updateDate, bt_reserved1, bt_reserved2)
+        values
+        (#{number},#{name},#{isManage},#{sex},#{tel},#{address},#{headURL},#{birthday},#{quitTime},#{entryTime},now(),now(),#{reserved1},#{reserved2});
+    </insert>
+
+    <insert id="addTeacherAndCompany" parameterType="cloud.entity.Teacher">
+        insert into ref_teacher_class (rtc_teacherId, rtc_companyId, rtc_classesId, rtc_custTypeId) values
+        <foreach collection="types" item="type" open="(" close=")" separator="),(">
+            #{id},#{company.id},null,#{type.id}
+        </foreach>
+    </insert>
+
+    <select id="findTeacherById" parameterType="long" resultMap="teacherResultMap">
+        SELECT
+        bt.*,bc.bc_name companyName,bc.bc_id companyId
+        FROM
+        base_teacher bt
+        LEFT JOIN ref_teacher_class rtc ON bt.bt_id = rtc.rtc_teacherId
+        LEFT JOIN base_company bc ON rtc.rtc_companyId = bc.bc_id
+        WHERE
+        bt_isDel = 0
+        AND bt_id = #{id}
+    </select>
+
+    <select id="getTeacherPage" parameterType="cloud.entity.Teacher" resultMap="teacherResultMap">
+        SELECT count(distinct bt.bt_id) totalCount,bt.*,<!--cb.bc_typeName typeName,-->cb.bc_id,
+        bc.bc_name companyName,sa.sa_name provinceName,sb.sa_name cityName,sc.sa_name areaName
+        FROM
+        base_teacher bt
+        LEFT JOIN ref_teacher_class rtc ON bt.bt_id = rtc.rtc_teacherId
+        LEFT JOIN base_company bc ON rtc.rtc_companyId = bc.bc_id
+        left join base_custtype cb on rtc.rtc_custTypeId = cb.bc_id
+        LEFT JOIN sys_area sa ON bc.bc_provinceId = sa.sa_id
+        LEFT JOIN sys_area sb ON bc.bc_cityId = sb.sa_id
+        LEFT JOIN sys_area sc ON bc.bc_areaId = sc.sa_id
+        <where>
+            <if test="name != null and name != '' ">
+                and bt.bt_name like "%"#{name}"%"
+            </if>
+            <if test="tel != null and tel != '' ">
+                and bt.bt_tel like "%"#{tel}"%"
+            </if>
+            <if test="provinceId != null and provinceId != '' ">
+                and bc.bc_provinceId = #{provinceId}
+            </if>
+            <if test="cityId != null and cityId != '' ">
+                and bc.bc_cityId = #{cityId}
+            </if>
+            <if test="areaId != null and areaId != '' ">
+                and bc.bc_areaId = #{areaId}
+            </if>
+            <if test="types != null">
+                and cb.bc_type in
+                <foreach collection="types" item="type" separator="," close=")" open="(">
+                    #{type.type}
+                </foreach>
+            </if>
+            <if test="page != null">
+                <if test="page.startIndex != null">
+                    limit #{page.startIndex}
+                </if>
+                <if test="page.pageSize != null and page.pageSize != ''">
+                    ,#{page.pageSize}
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <update id="updateTeacher" parameterType="cloud.entity.Teacher">
+        update
+        base_teacher
+        set
+        bt_number = #{number},bt_name = #{name},bt_isManage = #{isManage},bt_sex = #{sex},bt_tel = #{tel},bt_address =
+        #{address},bt_headURL = #{headURL},bt_birthday = #{birthday},bt_updateDate = now()
+        where bt_id = #{id}
+    </update>
+
+    <select id="selectByTechIdAndCompanyId" resultType="int">
+        select rtc_classesId from ref_teacher_class where rtc_teacherId = #{teachId} and rtc_companyId = #{companyId}
+    </select>
+
+    <delete id="delTechIdAndCompanyId">
+        delete from ref_teacher_class where rtc_teacherId = #{teachId} and rtc_companyId = #{companyId}
+    </delete>
+
+    <insert id="insertTechIdAndCompanyId">
+        insert into ref_teacher_class (rtc_teacherId, rtc_companyId, rtc_classesId, rtc_custTypeId) values
+        <foreach collection="types" item="type" open="(" close=")" separator="),(">
+            #{teachId},#{companyId},null,#{type}
+        </foreach>
+    </insert>
+
+    <update id="updateIsDel">
+        update base_teacher set bt_isDel = #{isDel} where bt_id = #{teachId};
+    </update>
+
+    <select id="getAreaList" parameterType="int" resultType="java.util.HashMap">
+        select sa_id areaId,sa_name areaName from sys_area where sa_parentId = #{areaId}
+    </select>
+</mapper>
